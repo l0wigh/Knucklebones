@@ -79,7 +79,20 @@ fn host_game(mut socket net.TcpConn, mut player Player)! {
 		socket.write_string("1\n")!
 		println("${friend.username} start !")
 	}
-	online_game_loop(mut socket, mut kb, player, friend)!
+	for {
+		online_game_loop(mut socket, mut kb, player, friend)!
+		println("Asking your friend if he wants to play again...")
+		if reader.read_line()! == "AGAIN" {
+			kb = Board {
+				p_board: [[]int{cap: 3}, []int{cap: 3}, []int{cap: 3}]
+				f_board: [[]int{cap: 3}, []int{cap: 3}, []int{cap: 3}]
+				p_score: [0, 0, 0, 0]
+				f_score: [0, 0, 0, 0]
+				playing: false
+			}
+		}
+		else { break }
+	}
 }
 
 fn client_game(mut socket net.TcpConn, mut player Player)! {
@@ -108,7 +121,23 @@ fn client_game(mut socket net.TcpConn, mut player Player)! {
 	else {
 		println("${friend.username} start !")
 	}
-	online_game_loop(mut socket, mut kb, player, friend)!
+	for {
+		online_game_loop(mut socket, mut kb, player, friend)!
+		mut r := readline.Readline{}
+		if r.read_line("Wants to play again (y/n) ? ")! == "y" {
+			socket.write_string("AGAIN\n")!
+			kb = Board {
+				p_board: [[]int{cap: 3}, []int{cap: 3}, []int{cap: 3}]
+				f_board: [[]int{cap: 3}, []int{cap: 3}, []int{cap: 3}]
+				p_score: [0, 0, 0, 0]
+				f_score: [0, 0, 0, 0]
+				playing: false
+			}
+		}
+		if reader.read_line()! == "AGAIN" {
+		}
+		else { break }
+	}
 }
 
 fn online_game_loop(mut socket net.TcpConn, mut kb Board, player Player, friend Player)! {
